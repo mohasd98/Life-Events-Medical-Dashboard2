@@ -1,555 +1,852 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TAMM Life Events Medical Hub</title>
-
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birth Certificate Journey: Transformation</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
+    
     <!-- React + ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-
+    
     <script>window.react = window.React;</script>
-
+    
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.min.js"></script>
-
+    
     <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-      ::-webkit-scrollbar { width: 6px; height: 6px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-      .hide-scrollbar::-webkit-scrollbar { display: none; }
-      .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      
-      @keyframes slideUp {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        /* UAE Pass Scan Animation */
+        .scan-line {
+            width: 100%;
+            height: 2px;
+            background: #22c55e;
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: scan 2s infinite linear;
+            box-shadow: 0 0 4px #22c55e;
+        }
+        @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+        
+        .metro-node { transition: all 0.3s ease; }
+        .metro-line { transition: width 0.5s ease; }
     </style>
-  </head>
-  <body class="bg-slate-50 text-slate-900">
+</head>
+<body class="text-slate-900">
     <div id="root"></div>
 
     <script type="text/babel">
-      const { useState, useMemo, useEffect, useRef } = React;
+        const { useState, useEffect } = React;
+        const Lucide = window.LucideReact || new Proxy({}, { get: () => () => null });
 
-      // --- ICON SYSTEM ---
-      const Lucide = window.LucideReact || {};
-      const FallbackIcon = (props) => <span {...props} className="inline-block w-4 h-4 bg-slate-200" />;
-      const getIcon = (name) => Lucide[name] || FallbackIcon;
-      
-      const Icons = {
-        Baby: getIcon("Baby"),
-        HeartPulse: getIcon("HeartPulse"),
-        ShieldCheck: getIcon("ShieldCheck"),
-        School: getIcon("School"),
-        Stethoscope: getIcon("Stethoscope"),
-        ClipboardCheck: getIcon("ClipboardCheck"),
-        FileText: getIcon("FileText"),
-        Sparkles: getIcon("Sparkles"),
-        UserRound: getIcon("UserRound"),
-        Activity: getIcon("Activity"),
-        Users: getIcon("Users"),
-        Briefcase: getIcon("Briefcase"),
-        Home: getIcon("Home"),
-        BookOpen: getIcon("BookOpen"),
-        ChevronRight: getIcon("ChevronRight"),
-        Search: getIcon("Search"),
-        Send: getIcon("Send"),
-        CheckCircle2: getIcon("CheckCircle2"),
-        AlertTriangle: getIcon("AlertTriangle"),
-        HeartHandshake: getIcon("HeartHandshake"),
-        GraduationCap: getIcon("GraduationCap"),
-        Calendar: getIcon("Calendar"),
-        MapPin: getIcon("MapPin"),
-        Clock: getIcon("Clock"),
-        X: getIcon("X"),
-        ArrowRight: getIcon("ArrowRight"),
-        Building2: getIcon("Building2"),
-        Bot: getIcon("Bot"),
-        Circle: getIcon("Circle"),
-        HandHeart: getIcon("HandHeart"),
-        Link2: getIcon("Link2"),
-        MessageCircle: getIcon("MessageCircle"),
-        User: getIcon("User"),
-        Accessibility: getIcon("Accessibility"),
-        Plane: getIcon("Plane"),
-        Info: getIcon("Info"),
-        ChevronDown: getIcon("ChevronDown"),
-        List: getIcon("List"),
-        Table2: getIcon("Table2"),
-        ListTodo: getIcon("ListTodo"),
-        Edit3: getIcon("Edit3"),
-        Loader2: getIcon("Loader2"),
-        Eye: getIcon("Eye"),
-        EyeOff: getIcon("EyeOff"),
-        Gift: getIcon("Gift"),
-        Mail: getIcon("Mail"),
-        ArrowLeft: getIcon("ArrowLeft"),
-        Settings2: getIcon("Settings2"),
-        CheckSquare: getIcon("CheckSquare"),
-        Square: getIcon("Square"),
-        Wand2: getIcon("Wand2"),
-        Lightbulb: getIcon("Lightbulb"),
-        FileHeart: getIcon("FileHeart"),
-        MessagesSquare: getIcon("MessagesSquare"),
-        Pencil: getIcon("Pencil"),
-        Plus: getIcon("Plus"),
-        GitBranch: getIcon("GitBranch"),
-        Smartphone: getIcon("Smartphone"),
-        Globe: getIcon("Globe"),
-        Moon: getIcon("Moon"),
-        Users2: getIcon("Users2"),
-        Bike: getIcon("Bike"),
-        QrCode: getIcon("QrCode"),
-        Shield: getIcon("Shield"),
-        FileCheck: getIcon("FileCheck"),
-        Watch: getIcon("Watch"),
-        Droplets: getIcon("Droplets"),
-        Thermometer: getIcon("Thermometer"),
-        Database: getIcon("Database"), 
-        Bell: getIcon("Bell"), 
-        Pill: getIcon("Pill"),
-        Heart: getIcon("Heart"),
-      };
+        // --- COMPONENTS ---
 
-      // --- UI COMPONENTS ---
-      const Card = ({ className, children, onClick }) => (
-        <div onClick={onClick} className={`rounded-2xl border border-slate-200 bg-white text-slate-950 shadow-sm ${className || ""} ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}>{children}</div>
-      );
-      const CardHeader = ({ className, children }) => <div className={`flex flex-col space-y-1.5 p-6 ${className || ""}`}>{children}</div>;
-      const CardTitle = ({ className, children }) => <h3 className={`text-xl font-bold leading-none tracking-tight text-slate-900 ${className || ""}`}>{children}</h3>;
-      const CardDescription = ({ className, children }) => <p className={`text-sm text-slate-500 ${className || ""}`}>{children}</p>;
-      const CardContent = ({ className, children }) => <div className={`p-6 pt-0 ${className || ""}`}>{children}</div>;
-
-      const Button = ({ className, variant = "default", size = "default", children, ...props }) => {
-        const variants = {
-          default: "bg-teal-700 text-white hover:bg-teal-800 shadow-md shadow-teal-900/10",
-          outline: "border border-slate-200 bg-white hover:bg-slate-50 text-slate-900",
-          ghost: "hover:bg-slate-100 text-slate-700",
-          secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200",
-          purple: "bg-purple-600 text-white hover:bg-purple-700 shadow-md shadow-purple-600/20", 
+        const Button = ({ children, onClick, variant = 'primary', className = '', disabled = false, icon: Icon }) => {
+            const base = "px-6 py-3 rounded-xl font-semibold transition-all active:scale-95 flex items-center justify-center gap-2 shadow-sm";
+            const styles = {
+                primary: "bg-teal-700 text-white hover:bg-teal-800",
+                secondary: "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200",
+                uae: "bg-slate-900 text-white hover:bg-slate-800",
+                ghost: "bg-transparent text-teal-700 hover:bg-teal-50",
+                danger: "bg-rose-50 text-rose-600 hover:bg-rose-100",
+                black: "bg-black text-white hover:bg-gray-800"
+            };
+            return (
+                <button 
+                    onClick={onClick} 
+                    disabled={disabled}
+                    className={`${base} ${styles[variant]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+                >
+                    {Icon && <Icon className="w-5 h-5"/>} {children}
+                </button>
+            );
         };
-        const sizes = { default: "h-10 px-4 py-2", sm: "h-8 rounded-lg px-3 text-xs", icon: "h-10 w-10" };
-        return (
-          <button className={`inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-slate-950 ${variants[variant]} ${sizes[size]} ${className || ""}`} {...props}>{children}</button>
+
+        const Card = ({ children, className = '' }) => (
+            <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden ${className}`}>
+                {children}
+            </div>
         );
-      };
 
-      const Badge = ({ className, variant = "default", children }) => {
-        const variants = {
-          default: "bg-slate-900 text-white",
-          secondary: "bg-slate-100 text-slate-900",
-          outline: "border border-slate-200 text-slate-600",
-          teal: "bg-teal-50 text-teal-700 border border-teal-200",
-          amber: "bg-amber-50 text-amber-700 border border-amber-200",
-          success: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-          purple: "bg-purple-50 text-purple-700 border border-purple-200",
-          red: "bg-red-50 text-red-700 border border-red-200",
-        };
-        return <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${variants[variant]} ${className || ""}`}>{children}</div>;
-      };
+        // --- SCREEN 1: TAMM SPLASH ---
+        const TammSplash = ({ onNext }) => {
+            useEffect(() => {
+                const timer = setTimeout(onNext, 2000);
+                return () => clearTimeout(timer);
+            }, []);
 
-      const Progress = ({ value, className }) => (
-        <div className={`relative h-3 w-full overflow-hidden rounded-full bg-slate-100 ${className || ''}`}>
-          <div className="h-full bg-teal-600 transition-all duration-500 ease-in-out" style={{ width: `${value}%` }} />
-        </div>
-      );
-
-      const Separator = ({ className }) => <div className={`h-[1px] w-full bg-slate-200 ${className || ''}`} />;
-      
-      const Input = ({ className, ...props }) => (
-        <input
-          className={`flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-700 disabled:cursor-not-allowed disabled:opacity-50 ${className || ''}`}
-          {...props}
-        />
-      );
-
-      // --- DATA FACTORY ---
-      const getPersonas = (babyName, revealedGender) => ({
-        citizen: {
-          label: "Citizen family", familyName: "Al Nuaimi Family", parents: "Omar & Aisha", expectedBaby: babyName ? `Baby ${babyName}` : (revealedGender ? `Baby ${revealedGender}` : "Expecting Baby"), location: "Abu Dhabi", benefitsLabel: "Family Book Path", features: ["Mabrouk Ma Yak", "Genome Testing", "School Seat Reserve"]
-        },
-        resident: {
-          label: "Resident family", familyName: "Khan Family", parents: "Hassan & Mariam", expectedBaby: babyName ? `Baby ${babyName}` : (revealedGender ? `Baby ${revealedGender}` : "Expecting Baby"), location: "Abu Dhabi", benefitsLabel: "Resident Path", features: ["MOFA Attestation", "Embassy Passport", "Civil Marriage"]
-        }
-      });
-
-      const getAIInsights = (persona, stage, profileType) => {
-        const isCitizen = persona === 'citizen';
-        const baseInsights = [];
-        if (profileType === 'father') {
-            baseInsights.push({ type: 'service', title: 'Mobile Home Care', desc: 'Schedule a nurse visit for your father.', icon: 'Stethoscope' });
-            baseInsights.push({ type: 'education', title: 'Caregiver Support', desc: 'Resources for family members supporting elderly.', icon: 'BookOpen' });
-            return baseInsights;
-        }
-        if (profileType === 'family') {
-             if (stage === 'newborn') baseInsights.push({ type: 'education', title: 'Breastfeeding Guide', desc: 'Support for the first 6 months.', icon: 'HeartPulse' });
-             if (stage === 'school_age') baseInsights.push({ type: 'service', title: 'School Vaccination', desc: 'Check upcoming school health campaigns.', icon: 'ShieldCheck' });
-             return baseInsights;
-        }
-        if (stage === 'premarital') {
-            baseInsights.push({ type: 'education', title: 'Why Genetic Screening Matters', desc: 'Understanding your compatibility results.', icon: 'BookOpen' });
-            if (isCitizen) baseInsights.push({ type: 'service', title: 'Medeem Marriage Grant', desc: 'Check if you qualify for financial support.', icon: 'Gift' });
-        }
-        else if (stage === 'marriage') {
-            baseInsights.push({ type: 'tip', title: 'Plan Your Ceremony', desc: 'Authorized officiants are available on weekends.', icon: 'Lightbulb' });
-        }
-        else if (stage === 'maternity') {
-            baseInsights.push({ type: 'education', title: 'Nutrition: Trimester 1', desc: 'Essential foods for you and your baby.', icon: 'HeartPulse' });
-        }
-        else if (stage === 'adult') {
-             baseInsights.push({ type: 'service', title: 'Ifhas Screening', desc: 'Book your comprehensive annual checkup.', icon: 'Activity' });
-        }
-        if (baseInsights.length === 0) {
-            baseInsights.push({ type: 'tip', title: 'Update Contact Info', desc: 'Ensure your phone number is current.', icon: 'Settings2' });
-        }
-        return baseInsights;
-      };
-
-      const getJourneyData = (persona, babyName, revealedGender) => {
-        const isCitizen = persona === 'citizen';
-        const birthJourney = isCitizen ? {
-          title: "Mabrouk Ma Yak", subtitle: "Newborn Bundle", icon: "Baby", description: "One request to issue all your newborn's official documents: Birth Certificate, ID, Passport, and Family Book.", status: "Action Required",
-          steps: [
-            { title: "Notification", desc: "Hospital submits birth details.", status: "completed", channel: "Provider Console", entity: "Hospital" },
-            { title: "Photo & Name", desc: babyName ? `Named: ${babyName}` : "Baby photo captured. Choose name.", status: babyName ? "completed" : "current", actionLabel: "Start Naming", channel: "TAMM", entity: "DoH" },
-            { title: "Bundle Processing", desc: "We issue Birth Certificate, EID, and Passport together.", status: babyName ? "current" : "upcoming", channel: "Backend", entity: "ICP" },
-            { title: "Delivery", desc: "Digital docs in Wallet. Physical cards delivered.", status: "upcoming", channel: "TAMM Wallet", entity: "ICP" }
-          ]
-        } : {
-          title: "Birth & Residency", subtitle: "Certificate & Visa", icon: "FileText", description: "Issue the Birth Certificate, attest it, and proceed with Residency issuance.", status: "Action Required",
-          steps: [
-            { title: "Notification", desc: "Hospital submits birth details.", status: "completed", channel: "Provider Console", entity: "Hospital" },
-            { title: "Birth Certificate", desc: babyName ? `Certificate for ${babyName}` : "Review details and name baby.", status: babyName ? "completed" : "current", actionLabel: "Issue Certificate", channel: "TAMM", entity: "DoH" },
-            { title: "Attestation", desc: "Digital MOFA attestation (if needed).", status: babyName ? "current" : "upcoming", channel: "TAMM", entity: "MOFA" },
-            { title: "Residency", desc: "Apply for Passport (Embassy) then Residency (ICP).", status: "upcoming", channel: "Embassy/ICP", entity: "Foreign Mission/ICP" }
-          ]
-        };
-        // Reuse same data structure as before
-        return {
-          premarital: { title: "Premarital Screening", subtitle: "Health readiness", icon: "HeartHandshake", description: "Complete your screening.", status: "In Progress", steps: [{ title: "Check Requirements", desc: "View checklist.", status: "completed", channel: "TAMM", entity: "DCD/ADJD" }, { title: "Book Appointment", desc: "Choose facility.", status: "current", actionLabel: "Book Appointment", channel: "TAMM Sahatna", entity: "SEHA" }, { title: "Attend Screening", desc: "Complete labs.", status: "upcoming", channel: "Clinic", entity: "SEHA" }, { title: "Receive Results", desc: "Digital results.", status: "upcoming", channel: "TAMM", entity: "DoH" }, { title: "Marriage Readiness", desc: "Status update.", status: "upcoming", channel: "Backend", entity: "ADJD" }] },
-          marriage: { title: "Marriage Contract", subtitle: "Legal & Religious", icon: "Users", description: "Apply for contract.", status: "In Progress", steps: [{ title: "Application", desc: "Start file.", status: "completed", channel: "TAMM", entity: "ADJD" }, { title: "Book Ceremony", desc: "Choose officiant.", status: "current", channel: "TAMM", entity: "ADJD" }, { title: "Digital Contract", desc: "Receive contract.", status: "upcoming", channel: "TAMM Wallet", entity: "ADJD" }] },
-          preconception: { title: "Family Planning", subtitle: "Pre-conception Support", icon: "HeartPulse", description: "Optional health checks.", status: "Future", steps: [{ title: "Health Profile", desc: "Baseline check.", status: "upcoming", channel: "TAMM", entity: "DoH" }, { title: "Clinical Consult", desc: "Book visit.", status: "upcoming", channel: "Clinic", entity: "SEHA" }] },
-          maternity: { title: "Maternity Journey", subtitle: "Antenatal", icon: "Stethoscope", description: "Track pregnancy.", status: "In Progress", steps: [{ title: "Confirm Pregnancy", desc: "Register file.", status: "completed", channel: "TAMM", entity: "DoH" }, { title: "Care Plan", desc: "View schedule.", status: "current", channel: "TAMM", entity: "DoH" }, { title: "Gender Reveal", desc: revealedGender ? `It's a ${revealedGender}!` : "Results ready.", status: revealedGender ? "completed" : "current", actionLabel: revealedGender ? null : "Reveal Gender", channel: "TAMM", entity: "DoH" }, { title: "Pre-Capture IDs", desc: "Upload docs.", status: "upcoming", channel: "TAMM", entity: "ICP" }, { title: "Birth Notification", desc: "Provider submits data.", status: "upcoming", channel: "Provider", entity: "Hospital" }] },
-          birth: birthJourney,
-          child_health: { title: "Child Health (0-12)", subtitle: "Vaccines", icon: "ShieldCheck", description: "Vaccinations.", status: "Action Required", steps: [{ title: "Newborn Screening", desc: "Metabolic checks.", status: "current", channel: "Hospital", entity: "DoH" }, { title: "Results", desc: "View results.", status: "upcoming", channel: "TAMM", entity: "DoH" }, { title: "Vaccine Schedule", desc: "View timeline.", status: "upcoming", channel: "TAMM", entity: "DoH" }] },
-          adolescent: { title: "Adolescent Health", subtitle: "Growth", icon: "UserRound", description: "Teen health tracking.", status: "Future", steps: [{ title: "Annual Checkup", desc: "Growth tracking.", status: "upcoming", channel: "Clinic", entity: "DoH" }] },
-          adult: { title: "Adult Health", subtitle: "Prevention", icon: "Activity", description: "Wellness checks.", status: "Future", steps: [{title: "Ifhas Screening", desc: "Annual checkup", status: "upcoming", channel: "Clinic", entity: "DoH"}] },
-          elderly: { title: "Elderly Care", subtitle: "Support", icon: "Users", description: "Home care & support.", status: "Active", steps: [{title: "Geriatric Assessment", desc: "Book review", status: "current", channel: "TAMM", entity: "DoH"}, {title: "Home Care", desc: "Request mobile support", status: "upcoming", channel: "TAMM", entity: "DoH/DCD"}] },
-          sanadkom: { title: "Sanadkom", subtitle: "End of Life", icon: "Heart", description: "Bereavement.", status: "Future", steps: [{title: "Notification", desc: "Hospital report", status: "upcoming", channel: "Provider", entity: "Hospital"}, {title: "Certificate", desc: "Digital cert", status: "upcoming", channel: "TAMM", entity: "DoH"}] },
-          housing: { title: "Housing & Support", subtitle: "ISKAN", icon: "Home", description: "Housing grants.", status: "In Progress", steps: [{ title: "Eligibility", desc: "Check qualification.", status: "completed", channel: "TAMM", entity: "ISKAN" }, { title: "Application", desc: "Submit request.", status: "current", channel: "TAMM", entity: "ISKAN" }] },
-          work: { title: "Work & Leave", subtitle: "Employment", icon: "Briefcase", description: "Manage leave.", status: "Future", steps: [{ title: "Employer Sync", desc: "Link record.", status: "upcoming", channel: "TAMM", entity: "MOHRE" }, { title: "Leave Request", desc: "Apply for leave.", status: "upcoming", channel: "TAMM", entity: "Employer" }] },
-          university: { title: "University", subtitle: "Admission", icon: "BookOpen", description: "Medical fitness.", status: "Future", steps: [{title: "Exam", desc: "Medical fitness", status: "upcoming", channel: "TAMM", entity: "DoH"}] },
-          work_screening: { title: "Work Fitness", subtitle: "Employment", icon: "Briefcase", description: "Pre-employment medical.", status: "Future", steps: [{title: "Screening", desc: "Visa medical", status: "upcoming", channel: "TAMM", entity: "DoH"}] },
-          hajj: { title: "Hajj & Umrah", subtitle: "Permit", icon: "Moon", description: "Pilgrim health.", status: "Future", steps: [{title: "Vaccination", desc: "Meningitis shot", status: "upcoming", channel: "Clinic", entity: "DoH"}] }
-        };
-      };
-
-      // --- COMPONENTS ---
-      function FathersHealthCard() { return (<Card className="border-teal-100 bg-gradient-to-br from-white to-teal-50/30"><CardHeader className="pb-3 border-b border-teal-100/50"><div className="flex items-center justify-between"><div className="flex items-center gap-2"><div className="p-2 bg-teal-100 rounded-lg text-teal-700"><Icons.Watch className="h-5 w-5" /></div><div><CardTitle className="text-base flex items-center gap-2">Remote Health Monitoring</CardTitle><div className="flex items-center gap-1.5 text-xs text-teal-600 mt-0.5"><span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span></span>Live Data (Home Device)</div></div></div><Badge variant="success" className="bg-emerald-100 text-emerald-700 border-0">Stable</Badge></div></CardHeader><CardContent className="pt-4 grid grid-cols-2 md:grid-cols-4 gap-4"><div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col items-center text-center"><Icons.HeartPulse className="h-5 w-5 text-rose-500 mb-1" /><div className="text-lg font-bold text-slate-900">72 <span className="text-[10px] text-slate-400 font-normal">bpm</span></div><div className="text-[10px] text-slate-500">Heart Rate</div></div><div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col items-center text-center"><Icons.Activity className="h-5 w-5 text-blue-500 mb-1" /><div className="text-lg font-bold text-slate-900">120/80</div><div className="text-[10px] text-slate-500">Blood Pressure</div></div><div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col items-center text-center"><Icons.Droplets className="h-5 w-5 text-amber-500 mb-1" /><div className="text-lg font-bold text-slate-900">5.4 <span className="text-[10px] text-slate-400 font-normal">mmol/L</span></div><div className="text-[10px] text-slate-500">Glucose</div></div><div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col items-center text-center"><Icons.Thermometer className="h-5 w-5 text-orange-500 mb-1" /><div className="text-lg font-bold text-slate-900">36.6 <span className="text-[10px] text-slate-400 font-normal">°C</span></div><div className="text-[10px] text-slate-500">Temp</div></div></CardContent></Card>); }
-      function DocumentPreviewModal({ isOpen, onClose, docType, persona, babyName }) { if (!isOpen) return null; const activePersona = persona === 'citizen' ? "Omar Al Nuaimi" : "Hassan Khan"; const baby = babyName || (persona === 'citizen' ? "Noor Al Nuaimi" : "Lina Khan"); return (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={onClose}><div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}><div className="bg-slate-900 p-4 flex justify-between items-center text-white"><div className="flex items-center gap-2"><Icons.FileText className="h-5 w-5" /><span className="font-semibold">Digital Document Viewer</span></div><button onClick={onClose}><Icons.X className="h-5 w-5" /></button></div><div className="p-8 bg-slate-50 flex flex-col items-center"><div className="bg-white border-2 border-slate-200 w-full aspect-[1/1.4] shadow-lg p-8 relative flex flex-col"><div className="flex justify-between items-start mb-8"><div className="text-center w-full"><div className="mx-auto w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center mb-2 text-white"><Icons.Shield className="h-6 w-6" /></div><h2 className="text-xl font-serif font-bold text-slate-900 uppercase tracking-widest">{docType}</h2><div className="text-[10px] text-slate-500 uppercase tracking-widest">United Arab Emirates</div></div></div><div className="flex-1 space-y-6">{docType === 'Family Book' && (<><div className="border-b border-slate-100 pb-2"><div className="text-[10px] text-slate-400 uppercase">Head of Family</div><div className="text-lg font-medium font-serif">{activePersona}</div></div><div className="border-b border-slate-100 pb-2"><div className="text-[10px] text-slate-400 uppercase">Status</div><div className="text-sm font-medium">Citizen - Abu Dhabi</div></div><div className="border-b border-slate-100 pb-2"><div className="text-[10px] text-slate-400 uppercase">Dependents</div><div className="text-sm">Aisha (Spouse), {baby} (Child)</div></div></>)}{docType === 'Birth Certificate' && (<><div className="border-b border-slate-100 pb-2"><div className="text-[10px] text-slate-400 uppercase">Name of Child</div><div className="text-xl font-medium font-serif text-teal-800">{baby}</div></div><div className="grid grid-cols-2 gap-4"><div className="border-b border-slate-100 pb-2"><div className="text-[10px] text-slate-400 uppercase">Date of Birth</div><div className="text-sm font-medium">15 DEC 2025</div></div><div className="border-b border-slate-100 pb-2"><div className="text-[10px] text-slate-400 uppercase">Place of Birth</div><div className="text-sm font-medium">Abu Dhabi</div></div></div><div className="border-b border-slate-100 pb-2"><div className="text-[10px] text-slate-400 uppercase">Father's Name</div><div className="text-sm">{activePersona}</div></div></>)}{docType === 'Marriage Contract' && (<><div className="grid grid-cols-2 gap-8 border-b border-slate-100 pb-4"><div><div className="text-[10px] text-slate-400 uppercase">Husband</div><div className="text-lg font-serif">{activePersona}</div></div><div className="text-right"><div className="text-[10px] text-slate-400 uppercase">Wife</div><div className="text-lg font-serif">{persona === 'citizen' ? 'Aisha' : 'Mariam'}</div></div></div><div className="text-center pt-4"><div className="text-[10px] text-slate-400 uppercase">Date of Marriage</div><div className="text-sm font-medium">12 MAR 2024</div></div></>)}</div><div className="mt-8 flex justify-between items-end"><div className="text-center"><Icons.QrCode className="h-16 w-16 text-slate-800" /><div className="text-[8px] text-slate-400 mt-1">SCAN TO VERIFY</div></div><div className="text-right"><div className="h-12 w-12 rounded-full border-2 border-teal-700/30 flex items-center justify-center text-[10px] text-teal-800 font-bold uppercase rotate-12">Official<br/>Document</div></div></div></div><div className="flex gap-3 mt-6 w-full"><Button className="flex-1 bg-slate-900 text-white"><Icons.CheckCircle2 className="mr-2 h-4 w-4" /> Valid</Button><Button variant="outline" className="flex-1"><Icons.Send className="mr-2 h-4 w-4" /> Share</Button></div><Button onClick={onClose} className="w-full mt-4 h-12 text-base font-semibold bg-teal-700 text-white hover:bg-teal-800 shadow-lg">Back to Dashboard</Button></div></div></div>); }
-      function BookingModal({ isOpen, onClose, onConfirm, serviceName }) { const [step, setStep] = useState(1); const [selectedCenter, setSelectedCenter] = useState(null); const [selectedDate, setSelectedDate] = useState(null); const [selectedTime, setSelectedTime] = useState(null); if (!isOpen) return null; const centers = [{ id: 1, name: "SEHA Main Center", distance: "2.5 km", time: "15 mins" }, { id: 2, name: "Mediclinic Airport Road", distance: "4.8 km", time: "22 mins" }, { id: 3, name: "Burjeel Hospital", distance: "6.1 km", time: "30 mins" }]; const dates = ["Mon, 15 Dec", "Tue, 16 Dec", "Wed, 17 Dec"]; const times = ["09:00 AM", "10:30 AM", "02:00 PM", "04:15 PM"]; const handleNext = () => { if (step === 1 && selectedCenter) setStep(2); if (step === 2 && selectedDate && selectedTime) setStep(3); }; const handleConfirm = () => { onConfirm(); setTimeout(() => { setStep(1); setSelectedCenter(null); setSelectedDate(null); setSelectedTime(null); onClose(); }, 500); }; return (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4"><div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 relative flex flex-col max-h-[90vh]"><div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50"><div><h3 className="text-xl font-bold text-slate-900">Book Appointment</h3><p className="text-sm text-slate-500">{serviceName || "Medical Service"}</p></div><button onClick={onClose} className="p-2 bg-white rounded-full hover:bg-slate-100 border border-slate-200 transition-colors"><Icons.X className="h-5 w-5 text-slate-500" /></button></div><div className="p-6 overflow-y-auto"><div className="flex items-center gap-2 mb-8"><div className={`h-1 flex-1 rounded-full ${step >= 1 ? 'bg-teal-600' : 'bg-slate-200'}`}></div><div className={`h-1 flex-1 rounded-full ${step >= 2 ? 'bg-teal-600' : 'bg-slate-200'}`}></div><div className={`h-1 flex-1 rounded-full ${step >= 3 ? 'bg-teal-600' : 'bg-slate-200'}`}></div></div>{step === 1 && (<div className="space-y-4"><h4 className="font-semibold text-slate-900">Select Center</h4><div className="bg-slate-100 h-32 rounded-xl flex items-center justify-center text-slate-400 mb-4 border-2 border-dashed border-slate-200"><span className="flex items-center gap-2"><Icons.MapPin className="h-5 w-5" /> Map View</span></div><div className="space-y-2">{centers.map(center => (<div key={center.id} onClick={() => setSelectedCenter(center)} className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between ${selectedCenter?.id === center.id ? 'border-teal-600 bg-teal-50' : 'border-slate-100 hover:border-slate-200'}`}><div className="flex items-center gap-3"><div className={`p-2 rounded-full ${selectedCenter?.id === center.id ? 'bg-teal-200 text-teal-800' : 'bg-slate-100 text-slate-500'}`}><Icons.Building2 className="h-5 w-5" /></div><div><div className="font-semibold text-sm text-slate-900">{center.name}</div><div className="text-xs text-slate-500">{center.distance} • {center.time}</div></div></div>{selectedCenter?.id === center.id && <Icons.CheckCircle2 className="h-5 w-5 text-teal-600" />}</div>))}</div></div>)}{step === 2 && (<div className="space-y-6"><div><h4 className="font-semibold text-slate-900 mb-3">Select Date</h4><div className="flex gap-2 overflow-x-auto pb-2">{dates.map(date => (<button key={date} onClick={() => setSelectedDate(date)} className={`px-4 py-3 rounded-xl border text-sm font-medium whitespace-nowrap transition-all ${selectedDate === date ? 'bg-slate-900 text-white border-slate-900' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'}`}>{date}</button>))}</div></div><div><h4 className="font-semibold text-slate-900 mb-3">Select Time</h4><div className="grid grid-cols-2 gap-2">{times.map(time => (<button key={time} onClick={() => setSelectedTime(time)} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-all ${selectedTime === time ? 'bg-teal-600 text-white border-teal-600' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'}`}>{time}</button>))}</div></div></div>)}{step === 3 && (<div className="text-center space-y-6 py-4"><div className="w-20 h-20 bg-teal-50 rounded-full flex items-center justify-center mx-auto"><Icons.Calendar className="h-10 w-10 text-teal-600" /></div><div><h3 className="text-xl font-bold text-slate-900">Confirm Booking?</h3><p className="text-slate-500 text-sm mt-2">Please review your appointment details.</p></div><div className="bg-slate-50 p-4 rounded-xl text-left space-y-3 border border-slate-100"><div className="flex justify-between text-sm"><span className="text-slate-500">Service</span><span className="font-medium text-slate-900">{serviceName}</span></div><div className="flex justify-between text-sm"><span className="text-slate-500">Location</span><span className="font-medium text-slate-900">{selectedCenter?.name}</span></div><div className="flex justify-between text-sm"><span className="text-slate-500">Date & Time</span><span className="font-medium text-slate-900">{selectedDate}, {selectedTime}</span></div></div></div>)}</div><div className="p-6 border-t border-slate-100 bg-slate-50/50">{step < 3 ? (<Button onClick={handleNext} disabled={(step === 1 && !selectedCenter) || (step === 2 && (!selectedDate || !selectedTime))} className="w-full h-12 text-base">Continue</Button>) : (<Button onClick={handleConfirm} className="w-full h-12 text-base bg-teal-700 hover:bg-teal-800">Confirm Booking</Button>)}</div></div></div>); }
-      function BabyNamingModal({ isOpen, onClose, onNameSubmit, persona }) { const [firstNameEn, setFirstNameEn] = useState(""); const [firstNameAr, setFirstNameAr] = useState(""); const [isSubmitting, setIsSubmitting] = useState(false); const [aiPrompt, setAiPrompt] = useState(""); const [aiSuggestions, setAiSuggestions] = useState([]); const [isGenerating, setIsGenerating] = useState(false); if (!isOpen) return null; const handleSubmit = () => { setIsSubmitting(true); setTimeout(() => { setIsSubmitting(false); onNameSubmit(firstNameEn); onClose(); }, 1500); }; const handleAiGenerate = () => { if (!aiPrompt) return; setIsGenerating(true); setAiSuggestions([]); setTimeout(() => { setIsGenerating(false); let results = ["Zayed", "Rashid", "Khalifa"]; if (aiPrompt.toLowerCase().includes("r")) results = ["Rashed", "Reem", "Rawda"]; if (aiPrompt.toLowerCase().includes("girl")) results = ["Latifa", "Shamsa", "Fatima"]; if (aiPrompt.toLowerCase().includes("modern")) results = ["Ayla", "Zain", "Kayan"]; setAiSuggestions(results); }, 1500); }; const selectSuggestion = (name) => { setFirstNameEn(name); setFirstNameAr("..."); }; return (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"><div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in fade-in zoom-in duration-200 overflow-hidden"><div className="flex items-center justify-between mb-4"><h3 className="text-xl font-bold text-slate-900">Name Your Baby</h3><button onClick={onClose}><Icons.X className="h-5 w-5 text-slate-400" /></button></div><div className="space-y-4"><div className="bg-purple-50 p-4 rounded-xl border border-purple-100 mb-4"><div className="flex items-center gap-2 mb-2"><Icons.Sparkles className="h-4 w-4 text-purple-600" /><h4 className="text-sm font-bold text-purple-900">Need inspiration? Ask AI</h4></div><div className="flex gap-2"><Input value={aiPrompt} onChange={(e) => setAiPrompt(e.target.value)} placeholder="e.g. Traditional names starting with R" className="bg-white border-purple-200 focus:ring-purple-500 h-9 text-xs" /><Button variant="purple" size="sm" className="h-9 px-3" onClick={handleAiGenerate} disabled={!aiPrompt || isGenerating}>{isGenerating ? <Icons.Loader2 className="h-3 w-3 animate-spin" /> : <Icons.Wand2 className="h-3 w-3" />}</Button></div>{aiSuggestions.length > 0 && (<div className="mt-3 flex flex-wrap gap-2 animate-in slide-in-from-top-2">{aiSuggestions.map(name => (<button key={name} onClick={() => selectSuggestion(name)} className="bg-white border border-purple-200 text-purple-700 px-3 py-1 rounded-full text-xs font-medium hover:bg-purple-100 transition-colors">{name}</button>))}</div>)}</div><div className="bg-blue-50 p-3 rounded-lg flex items-start gap-2"><Icons.Info className="h-5 w-5 text-blue-600 mt-0.5" /><p className="text-xs text-blue-800">We will check your chosen name against {persona === 'citizen' ? 'ICP' : 'Official'} naming rules.</p></div><div><label className="block text-sm font-medium text-slate-700 mb-1">First Name (English)</label><Input value={firstNameEn} onChange={(e) => setFirstNameEn(e.target.value)} placeholder="e.g. Zayed" /></div><div><label className="block text-sm font-medium text-slate-700 mb-1">First Name (Arabic)</label><Input value={firstNameAr} onChange={(e) => setFirstNameAr(e.target.value)} placeholder="e.g. زايد" className="text-right" /></div><div className="pt-2"><div className="text-xs text-slate-500 mb-1">Family Name (Fixed)</div><div className="font-semibold text-slate-900 bg-slate-100 px-3 py-2 rounded-lg">{persona === 'citizen' ? 'Al Nuaimi' : 'Khan'}</div></div><Button onClick={handleSubmit} className="w-full mt-2" disabled={!firstNameEn || !firstNameAr || isSubmitting}>{isSubmitting ? (<span className="flex items-center gap-2"><Icons.Loader2 className="h-4 w-4 animate-spin" /> Checking Rules...</span>) : "Confirm Name"}</Button></div></div></div>); }
-      function GenderRevealModal({ isOpen, onClose, onReveal }) { if(!isOpen) return null; return (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"><div className="bg-white p-8 rounded-2xl w-full max-w-sm text-center"><h3 className="text-2xl font-bold text-slate-900 mb-4">It's a Boy!</h3><Button onClick={()=>{onReveal("Boy"); onClose();}} className="w-full">Awesome</Button></div></div>); }
-      function JourneyTimeline({ data, onAction }) { if (!data || !data.steps || !data.steps.length) return <div className="text-sm text-slate-400 italic p-4">Timeline available upon activation.</div>; return (<div className="mt-6 relative pl-4 border-l-2 border-slate-100 space-y-8">{data.steps.map((step, i) => { const isCompleted = step.status === 'completed'; const isCurrent = step.status === 'current'; const hasAction = step.actionLabel && isCurrent; return (<div key={i} className="relative pl-6"><div className={`absolute -left-[21px] top-1 w-4 h-4 rounded-full border-2 ${isCompleted ? 'bg-teal-600 border-teal-600' : isCurrent ? 'bg-white border-teal-600 ring-4 ring-teal-50' : 'bg-slate-100 border-slate-300'}`}>{isCompleted && <Icons.CheckCircle2 className="w-3 h-3 text-white absolute top-[-1px] left-[-1px]" />}</div><div className={`flex flex-col ${isCurrent ? 'opacity-100' : 'opacity-70'}`}><div className="flex items-center justify-between"><span className={`text-sm font-bold ${isCurrent ? 'text-teal-800' : 'text-slate-900'}`}>{step.title}</span>{step.systemNote && <Badge variant="secondary" className="text-[10px] h-5 bg-slate-100 text-slate-500 font-normal ml-2">{step.systemNote}</Badge>}</div><span className="text-xs text-slate-500 mt-1">{step.desc}</span>{hasAction && (<div className="mt-3"><Button size="sm" className={`h-8 text-xs rounded-lg ${step.title.includes('Gender') ? 'bg-indigo-600 hover:bg-indigo-700' : ''}`} onClick={() => onAction && onAction(step.actionLabel)}>{step.actionLabel} {step.title.includes('Gender') ? <Icons.Eye className="ml-1.5 h-3 w-3" /> : (step.actionLabel.includes("Book") ? <Icons.Calendar className="ml-1.5 h-3 w-3" /> : <Icons.Pencil className="ml-1.5 h-3 w-3" />)}</Button></div>)}{isCurrent && !hasAction && (<div className="mt-3"><Badge variant="amber" className="font-normal">In Progress</Badge></div>)}</div></div>); })}</div>); }
-      function JourneyProgressCard({ journeyKey, data, onAction }) { if (!data) return null; const completedSteps = data.steps ? data.steps.filter(s => s.status === 'completed').length : 0; const totalSteps = data.steps ? data.steps.length : 0; const progressPercent = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0; const Icon = Icons[data.icon] || Icons.Circle; const isMarriage = journeyKey === 'marriage'; return (<Card className="bg-white border-slate-200 overflow-hidden"><div className="p-6"><div className="flex items-start justify-between gap-4 mb-6"><div className="flex items-start gap-4"><div className="h-14 w-14 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0"><Icon className="h-7 w-7" /></div><div><div className="flex items-center gap-2 mb-1"><h2 className="text-xl font-bold text-slate-900">{data.title}</h2><Badge variant={data.status === 'Completed' ? 'success' : 'amber'}>{data.status}</Badge></div><p className="text-slate-500 text-sm leading-relaxed">{data.description}</p></div></div>{isMarriage && (<Button variant="secondary" size="sm" className="h-8 text-xs shrink-0" onClick={() => onAction && onAction('restart_marriage')}><Icons.Plus className="h-3 w-3 mr-1" /> New App</Button>)}</div><div className="space-y-2"><div className="flex items-center justify-between text-xs font-medium text-slate-700"><span>Journey Progress</span><span>{Math.round(progressPercent)}% ({completedSteps}/{totalSteps} steps)</span></div><Progress value={progressPercent} /></div></div></Card>); }
-      function InteractiveAIAssistant({ persona, activeStage, activeProfile }) { const [messages, setMessages] = useState([{ role: 'ai', text: `Welcome back. I can help you prepare for your upcoming Life Events.` }]); const [input, setInput] = useState(""); const [activeTab, setActiveTab] = useState('chat'); const scrollRef = useRef(null); useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages, activeTab]); const handleSend = (text) => { const userText = text || input; if (!userText.trim()) return; setMessages(prev => [...prev, { role: 'user', text: userText }]); setInput(""); setTimeout(() => { let reply = "I can certainly help with that."; const lowerText = userText.toLowerCase(); if (lowerText.includes('eligibility')) { reply = "I've checked your profile. You are eligible for the Premarital Screening. Would you like to book an appointment?"; } else if (lowerText.includes('book')) { reply = "I can show you the nearest SEHA facilities. Please select 'Booking' in the journey card."; } else if (lowerText.includes('mabrouk') || lowerText.includes('birth certificate')) { if (persona === 'citizen') { reply = "As a Citizen, your Birth Certificate is part of the 'Mabrouk Ma Yak' bundle. Once the hospital notification is received, we'll issue the Certificate, EID, and Passport automatically."; } else { reply = "For Residents, you'll first issue the Birth Certificate. Then I can guide you through MOFA Attestation and the Embassy Passport application."; } } else if (lowerText.includes('apply')) { if (lowerText.includes('housing')) { if (persona === 'citizen') { reply = "I've checked your Family Book status. You are eligible for Housing Assistance. I have auto-submitted your application. Reference: HSG-9921."; } else { reply = "Housing assistance via ISKAN is currently available for UAE Citizens. Please check the 'Work & Leave' section for employer support."; } } else if (lowerText.includes('leave')) { reply = "I have connected with your employer. Your Paternity Leave request for 5 days has been drafted. Status: Pending Employer Action."; } else { reply = "I can help you apply for Housing or Leave. Which one would you like?"; } } else if (lowerText.includes('doc')) { reply = "Your verified Family Book is in the wallet below. Future documents like the Birth Certificate will appear there automatically."; } setMessages(prev => [...prev, { role: 'ai', text: reply }]); }, 1200); }; const insights = getAIInsights(persona, activeStage, activeProfile); return (<Card className="flex flex-col h-[420px] shadow-lg border-0 bg-slate-900 text-white overflow-hidden"><div className="p-4 border-b border-slate-700 bg-slate-800/50 flex flex-col gap-3"><div className="flex items-center gap-2"><div className="h-8 w-8 rounded-full bg-teal-500 flex items-center justify-center shadow-lg shadow-teal-500/20"><Icons.Sparkles className="h-4 w-4 text-white"/></div><div><h3 className="text-sm font-bold">AI Companion</h3><p className="text-xs text-slate-400">Smart Support & Insights</p></div></div><div className="flex bg-slate-800/80 p-1 rounded-lg"><button onClick={()=>setActiveTab('chat')} className={`flex-1 py-1.5 text-xs rounded ${activeTab==='chat'?'bg-slate-700':''}`}>Chat</button><button onClick={()=>setActiveTab('insights')} className={`flex-1 py-1.5 text-xs rounded ${activeTab==='insights'?'bg-slate-700':''}`}>Insights <span className="ml-1 bg-teal-600 text-[9px] px-1 rounded-full">{insights.length}</span></button></div></div>{activeTab === 'chat' ? (<><div className="flex-1 overflow-y-auto p-4 space-y-4" ref={scrollRef}>{messages.map((m,i)=>(<div key={i} className={`flex ${m.role==='user'?'justify-end':'justify-start'}`}><div className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${m.role==='user'?'bg-teal-600':'bg-slate-800'}`}>{m.text}</div></div>))}</div><div className="p-3 bg-slate-800/50 space-y-3"><div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">{persona === 'citizen' && (<button onClick={() => handleSend("Apply for housing grants")} className="whitespace-nowrap px-3 py-1.5 rounded-full bg-slate-700 hover:bg-slate-600 text-xs font-medium transition-colors">Apply for housing grants</button>)}<button onClick={() => handleSend("Request Leave")} className="whitespace-nowrap px-3 py-1.5 rounded-full bg-slate-700 hover:bg-slate-600 text-xs font-medium transition-colors">Request Leave</button><button onClick={() => handleSend("Check eligibility")} className="whitespace-nowrap px-3 py-1.5 rounded-full bg-slate-700 hover:bg-slate-600 text-xs font-medium transition-colors">Eligibility</button>{persona === 'citizen' && (<button onClick={() => handleSend("How does Mabrouk Ma Yak work?")} className="whitespace-nowrap px-3 py-1.5 rounded-full bg-slate-700 hover:bg-slate-600 text-xs font-medium transition-colors">Mabrouk Ma Yak info</button>)}</div><div className="flex gap-2"><input className="flex-1 bg-slate-950/50 border border-slate-700 rounded-xl px-3 text-sm text-white" value={input} onChange={e=>setInput(e.target.value)} /><button onClick={() => handleSend(input)} className="h-10 w-10 bg-teal-600 rounded-xl flex items-center justify-center"><Icons.Send className="h-4 w-4"/></button></div></div></>) : (<div className="flex-1 overflow-y-auto p-4 space-y-3"><div className="flex items-center justify-between mb-2"><h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Recommended for you</h4><Badge variant="secondary" className="bg-slate-800 text-slate-300 text-[10px] h-5 border-0">Based on {activeStage}</Badge></div>{insights.map((item, idx) => { const Icon = Icons[item.icon] || Icons.Lightbulb; return (<div key={idx} className="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 rounded-xl p-3 transition-colors cursor-pointer group"><div className="flex items-start gap-3"><div className={`p-2 rounded-lg shrink-0 ${item.type === 'service' ? 'bg-teal-900/30 text-teal-400' : 'bg-purple-900/30 text-purple-400'}`}><Icon className="h-4 w-4" /></div><div className="flex-1"><div className="flex items-center gap-2 mb-1"><Badge variant="outline" className={`text-[10px] h-4 px-1.5 border-0 ${item.type === 'service' ? 'bg-teal-900/50 text-teal-300' : 'bg-purple-900/50 text-purple-300'}`}>{item.type === 'service' ? 'Service' : item.type === 'tip' ? 'Smart Tip' : 'Education'}</Badge></div><h5 className="text-sm font-medium text-white group-hover:text-teal-300 transition-colors">{item.title}</h5><p className="text-xs text-slate-400 mt-1 leading-relaxed">{item.desc}</p></div><Icons.ChevronDown className="-rotate-90 h-4 w-4 text-slate-600 group-hover:text-white transition-colors" /></div></div>) })}</div>)}</Card>);
-      }
-      
-      // --- NOTIFICATION CENTER COMPONENT ---
-      function NotificationCenter({ isOpen, onClose }) {
-          if (!isOpen) return null;
-          
-          const notifications = [
-              { id: 1, profile: 'Myself', text: 'Premarital Screening Results Ready', time: '2h ago', icon: 'FileCheck', color: 'text-teal-600', bg: 'bg-teal-50' },
-              { id: 2, profile: 'Baby', text: '2-Month Vaccination Due', time: '1d ago', icon: 'Baby', color: 'text-blue-600', bg: 'bg-blue-50' },
-              { id: 3, profile: 'Father', text: 'Prescription Renewal Needed', time: '3d ago', icon: 'Pill', color: 'text-amber-600', bg: 'bg-amber-50' },
-          ];
-
-          return (
-              <div className="absolute top-16 right-4 md:right-10 z-50 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 animate-in fade-in slide-in-from-top-2 overflow-hidden">
-                  <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                      <h3 className="font-bold text-slate-900">Notifications</h3>
-                      <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><Icons.X className="h-4 w-4" /></button>
-                  </div>
-                  <div className="max-h-[300px] overflow-y-auto">
-                      {notifications.map(n => {
-                          const Icon = Icons[n.icon] || Icons.Bell;
-                          return (
-                              <div key={n.id} className="p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer flex gap-3">
-                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${n.bg} ${n.color}`}>
-                                      <Icon className="h-5 w-5" />
-                                  </div>
-                                  <div>
-                                      <div className="flex justify-between items-start">
-                                          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{n.profile}</span>
-                                          <span className="text-[10px] text-slate-400">{n.time}</span>
-                                      </div>
-                                      <p className="text-sm font-medium text-slate-900 mt-0.5">{n.text}</p>
-                                  </div>
-                              </div>
-                          );
-                      })}
-                  </div>
-                  <div className="p-2 bg-slate-50 text-center">
-                      <button className="text-xs font-medium text-teal-700 hover:text-teal-800">Mark all as read</button>
-                  </div>
-              </div>
-          );
-      }
-
-      function LifeEventsMedicalHubDashboard() {
-        const [personaKey, setPersonaKey] = useState("citizen");
-        const [activeProfile, setActiveProfile] = useState("me"); 
-        const [activeJourneyKey, setActiveJourneyKey] = useState("maternity"); 
-        const [babyName, setBabyName] = useState(null);
-        const [revealedGender, setRevealedGender] = useState(null);
-        const [activeDocument, setActiveDocument] = useState(null);
-
-        const [isNamingModalOpen, setIsNamingModalOpen] = useState(false);
-        const [isRevealModalOpen, setIsRevealModalOpen] = useState(false);
-        const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-        const [isNotificationsOpen, setIsNotificationsOpen] = useState(false); 
-        const [isCustomizeOpen, setIsCustomizeOpen] = useState(false); 
-        const [visibleJourneyIds, setVisibleJourneyIds] = useState(["premarital", "marriage", "preconception", "maternity", "birth", "child_health", "adolescent", "adult", "elderly", "sanadkom"]);
-
-        const personas = getPersonas(babyName, revealedGender);
-        const activePersona = personas[personaKey];
-        const JOURNEY_DATA = useMemo(() => getJourneyData(personaKey, babyName, revealedGender), [personaKey, babyName, revealedGender]);
-
-        const handleJourneyClick = (key) => { setActiveJourneyKey(key); };
-        const handleTimelineAction = (actionLabel) => { 
-            if (actionLabel === "Start Naming" || actionLabel === "Issue Certificate") { setIsNamingModalOpen(true); } 
-            if (actionLabel === "Reveal Gender") { setIsRevealModalOpen(true); } 
-            if (actionLabel === "Book Appointment") { setIsBookingModalOpen(true); }
-        };
-        const handleNameSubmit = (name) => { setBabyName(name); };
-        const handleGenderReveal = (gender) => { setRevealedGender(gender); };
-        const handleRestartMarriage = () => { alert("New Marriage Application Started!"); };
-        const handleBookingConfirm = () => { alert("Booking Confirmed!"); setIsBookingModalOpen(false); };
-        const toggleJourneyVisibility = (id) => { setVisibleJourneyIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]); };
-
-        // ... (Spine Logic)
-        const getSpineForProfile = (profile) => {
-            if (profile === 'me') {
-                return [
-                    { id: "premarital", label: "Premarital", type: 'main', branches: [] },
-                    { id: "marriage", label: "Marriage", type: 'main', branches: [{id: 'housing', label: 'Housing Grant', icon: 'Home'}] },
-                    { id: "preconception", label: "Pre-conception", type: 'main', branches: [] },
-                    { id: "maternity", label: "Maternity", type: 'main', branches: [{id: 'work', label: 'Leave', icon: 'Briefcase'}] },
-                    { id: "birth", label: personaKey === 'citizen' ? "Mabrouk Ma Yak" : "Birth & Residency", type: 'main', branches: [] },
-                    { id: "adult", label: "Adult Health", type: 'main', branches: [{id: 'work_screening', label: 'Work Fitness', icon: 'Briefcase'}, {id: 'hajj', label: 'Hajj & Umrah', icon: 'Moon'}] }
-                ];
-            } else if (profile === 'family') { 
-                return [
-                    { id: "newborn", label: "Newborn (0-2m)", type: 'main', branches: [] },
-                    { id: "child_health", label: "Child Health", type: 'main', branches: [{id: 'education', label: 'School Entry', icon: 'GraduationCap'}] },
-                    { id: "adolescent", label: "Adolescent (13+)", type: 'main', branches: [{id: 'university', label: 'University', icon: 'BookOpen'}] }
-                ];
-            } else if (profile === 'father') {
-                return [
-                    { id: "elderly", label: "Elderly Care", type: 'main', branches: [{id: 'sanadkom', label: 'Sanadkom', icon: 'Heart'}] }
-                ];
-            }
-            return [];
-        };
-
-        const ALL_LIFE_SPINE = getSpineForProfile(activeProfile);
-        const VISIBLE_SPINE = ALL_LIFE_SPINE.filter(s => visibleJourneyIds.includes(s.id));
-
-        useEffect(() => { if (VISIBLE_SPINE.length > 0) { setActiveJourneyKey(VISIBLE_SPINE[0].id); } }, [activeProfile]);
-
-        return (
-          <div className={`min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900 pb-20`}>
-            <div className="max-w-7xl mx-auto space-y-6">
-              
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-2xl bg-teal-700 text-white flex items-center justify-center shadow-sm"><Icons.Activity className="h-6 w-6" /></div>
-                  <div><div className="text-xs font-bold text-slate-500 uppercase tracking-wide">TAMM</div><h1 className="text-2xl font-bold text-slate-900">Life Events Medical Hub</h1></div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className="relative p-2.5 bg-white rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors mr-2">
-                        <Icons.Bell className="h-5 w-5 text-slate-600" />
-                        <span className="absolute top-2 right-2.5 h-2 w-2 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
-                    <div className="bg-white rounded-xl border border-slate-200 p-1 flex items-center shadow-sm">
-                      <button onClick={() => { setPersonaKey("citizen"); setBabyName(null); setRevealedGender(null); }} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${personaKey === 'citizen' ? 'bg-slate-900 text-white shadow' : 'text-slate-500 hover:bg-slate-50'}`}>Citizen</button>
-                      <button onClick={() => { setPersonaKey("resident"); setBabyName(null); setRevealedGender(null); }} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${personaKey === 'resident' ? 'bg-slate-900 text-white shadow' : 'text-slate-500 hover:bg-slate-50'}`}>Resident</button>
+            return (
+                <div className="h-screen flex flex-col items-center justify-center bg-gradient-to-br from-teal-900 to-teal-700 text-white relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                    <div className="z-10 flex flex-col items-center animate-slide-up">
+                        <div className="w-24 h-24 bg-white/10 rounded-3xl flex items-center justify-center backdrop-blur-md mb-6 border border-white/20 shadow-2xl">
+                            <Lucide.Activity className="w-12 h-12 text-white" />
+                        </div>
+                        <h1 className="text-4xl font-bold tracking-tight">TAMM</h1>
+                        <p className="text-teal-200 mt-2 text-sm tracking-widest uppercase">Abu Dhabi Government</p>
+                    </div>
+                    <div className="absolute bottom-10">
+                        <Lucide.Loader2 className="w-6 h-6 animate-spin text-teal-300"/>
                     </div>
                 </div>
-              </div>
-              
-              {/* Notification Center */}
-              <NotificationCenter isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
+            );
+        };
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card onClick={() => setActiveProfile('me')} className={`cursor-pointer transition-all hover:border-teal-300 ${activeProfile === 'me' ? 'ring-2 ring-teal-600 bg-teal-50/50' : 'opacity-80 hover:opacity-100'}`}>
-                      <CardContent className="p-4 flex items-center gap-3">
-                          <div className={`h-12 w-12 rounded-full flex items-center justify-center border-2 ${activeProfile === 'me' ? 'bg-teal-600 text-white border-teal-200' : 'bg-slate-100 text-slate-400 border-white'}`}><Icons.User className="h-6 w-6" /></div>
-                          <div><div className="text-sm font-bold text-slate-900 flex items-center gap-2">Myself </div><div className="text-xs text-slate-500">Omar Al Nuaimi</div></div>
-                      </CardContent>
-                  </Card>
-                  <Card onClick={() => setActiveProfile('family')} className={`cursor-pointer transition-all hover:border-teal-300 ${activeProfile === 'family' ? 'ring-2 ring-teal-600 bg-teal-50/50' : 'opacity-80 hover:opacity-100'}`}>
-                      <CardContent className="p-4 flex items-center gap-3">
-                          <div className={`h-12 w-12 rounded-full flex items-center justify-center border-2 ${activeProfile === 'family' ? 'bg-teal-600 text-white border-teal-200' : 'bg-slate-100 text-slate-400 border-white'}`}><Icons.Users2 className="h-6 w-6" /></div>
-                          <div><div className="text-sm font-bold text-slate-900 flex items-center gap-2">My Children </div><div className="text-xs text-slate-500">2 Dependents</div></div>
-                      </CardContent>
-                  </Card>
-                  <Card onClick={() => setActiveProfile('father')} className={`cursor-pointer transition-all hover:border-teal-300 ${activeProfile === 'father' ? 'ring-2 ring-teal-600 bg-teal-50/50' : 'opacity-80 hover:opacity-100'}`}>
-                      <CardContent className="p-4 flex items-center gap-3">
-                          <div className={`h-12 w-12 rounded-full flex items-center justify-center border-2 ${activeProfile === 'father' ? 'bg-teal-600 text-white border-teal-200' : 'bg-slate-100 text-slate-400 border-white'}`}><Icons.User className="h-6 w-6" /></div>
-                          <div><div className="text-sm font-bold text-slate-900 flex items-center gap-2">My Father </div><div className="text-xs text-slate-500">Mohammed Al Nuaimi</div></div>
-                      </CardContent>
-                  </Card>
-              </div>
+        // --- SCREEN 2: UAE PASS LOGIN ---
+        const UAEPassLogin = ({ onLogin }) => {
+            const [isScanning, setIsScanning] = useState(false);
 
-              {/* FIXED METRO MAP */}
-              <div className="relative pt-4">
-                  <div className="flex justify-end mb-2">
-                     <button onClick={() => setIsCustomizeOpen(!isCustomizeOpen)} className="text-xs font-medium text-teal-700 hover:text-teal-800 flex items-center gap-1"><Icons.Settings2 className="h-3.5 w-3.5" /> Customize Journey</button>
-                     {isCustomizeOpen && (<div className="absolute top-8 right-0 z-20 w-64 bg-white rounded-xl shadow-xl border border-slate-200 p-4 animate-in fade-in slide-in-from-top-2"><h4 className="text-sm font-bold mb-3">Visible Stages</h4><div className="space-y-2 max-h-60 overflow-y-auto pr-2">{ALL_LIFE_SPINE.map(s => (<label key={s.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-slate-50 p-1 rounded"><div className={`w-4 h-4 rounded border flex items-center justify-center ${visibleJourneyIds.includes(s.id) ? 'bg-teal-600 border-teal-600' : 'border-slate-300'}`} onClick={() => toggleJourneyVisibility(s.id)}>{visibleJourneyIds.includes(s.id) && <Icons.CheckCircle2 className="w-3 h-3 text-white" />}</div><span>{s.label}</span></label>))}</div></div>)}
-                  </div>
-                  
-                  <div className="overflow-x-auto pb-16 pt-4 hide-scrollbar">
-                    <div className="flex items-start min-w-max px-4 relative pt-10">
-                        {/* Connecting Line - Background */}
-                        <div className="absolute top-[52px] left-0 w-full h-1 bg-slate-200 -z-10 rounded-full"></div>
+            const handleLogin = () => {
+                setIsScanning(true);
+                setTimeout(() => {
+                    setIsScanning(false);
+                    onLogin();
+                }, 2000);
+            };
+
+            return (
+                <div className="h-screen flex flex-col items-center justify-center bg-slate-50 p-6 relative">
+                    <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] opacity-50"></div>
+
+                    {isScanning ? (
+                        <div className="z-10 flex flex-col items-center animate-fade-in">
+                            <div className="w-32 h-32 bg-white rounded-3xl relative overflow-hidden shadow-2xl border-4 border-slate-900 flex items-center justify-center mb-8">
+                                <Lucide.Fingerprint className="w-16 h-16 text-slate-800 opacity-20" />
+                                <div className="scan-line"></div>
+                            </div>
+                            <h2 className="text-xl font-bold text-slate-900">Verifying Identity...</h2>
+                            <p className="text-slate-500 mt-2">Please look at the camera</p>
+                        </div>
+                    ) : (
+                        <div className="z-10 w-full max-w-sm">
+                            <div className="text-center mb-12">
+                                <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h1>
+                                <p className="text-slate-500">Access your digital government services</p>
+                            </div>
+                            
+                            <Card className="p-8 mb-6 border-slate-200 shadow-lg">
+                                <div className="flex justify-center mb-6">
+                                    <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                                        UAE<br/>PASS
+                                    </div>
+                                </div>
+                                <Button onClick={handleLogin} variant="uae" className="w-full h-14 text-lg shadow-xl" icon={Lucide.ScanFace}>
+                                    Login with UAE Pass
+                                </Button>
+                            </Card>
+                            
+                            <p className="text-center text-xs text-slate-400">Secure & Trusted Identity</p>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- SCREEN 3: LANDING / SPLIT ---
+        const LandingPage = ({ onSelectMode = () => {} }) => {
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50 relative">
+                    <div className="absolute top-6 right-6 flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center border border-slate-300">
+                            <Lucide.User className="w-4 h-4 text-slate-500"/>
+                        </div>
+                        <span className="text-sm font-bold text-slate-700">Omar Al Nuaimi</span>
+                    </div>
+
+                    <div className="max-w-5xl w-full z-10">
+                        <div className="text-center mb-12">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-xs font-bold mb-4">
+                                <Lucide.Sparkles className="w-3 h-3"/> Service Transformation
+                            </div>
+                            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Issue Newborn Birth Certificate</h1>
+                            <p className="text-slate-500 max-w-lg mx-auto">Experience the difference between the legacy process and the re-engineered digital journey.</p>
+                        </div>
                         
-                        {/* Active Progress Line */}
-                        <div 
-                            className="absolute top-[52px] left-0 h-1 bg-teal-600 -z-0 rounded-full transition-all duration-500 ease-in-out" 
-                            style={{ width: `${(VISIBLE_SPINE.findIndex(s => s.id === activeJourneyKey) / Math.max(1, VISIBLE_SPINE.length - 1)) * 100}%` }}
-                        ></div>
+                        <div className="grid md:grid-cols-2 gap-8">
+                            {/* AS-IS BUTTON */}
+                            <button 
+                                onClick={() => onSelectMode('asis')}
+                                className="group relative bg-white p-8 rounded-3xl border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-xl transition-all text-left duration-300 h-full flex flex-col"
+                            >
+                                <div className="absolute top-6 right-6">
+                                    <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Current State</span>
+                                </div>
+                                <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    <Lucide.History className="w-7 h-7 text-slate-400 group-hover:text-slate-600 transition-colors"/>
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">The "As-Is" Journey</h3>
+                                <p className="text-sm text-slate-500 mb-6 leading-relaxed">High friction, multiple payment points, and manual data entry.</p>
+                                
+                                <div className="space-y-3 mt-auto">
+                                     <div className="flex items-start gap-2 text-xs text-rose-700">
+                                        <Lucide.XCircle className="w-4 h-4 shrink-0 mt-0.5"/> Confusing Notification Selection
+                                    </div>
+                                    <div className="flex items-start gap-2 text-xs text-rose-700">
+                                        <Lucide.XCircle className="w-4 h-4 shrink-0 mt-0.5"/> Redundant Document Uploads
+                                    </div>
+                                    <div className="flex items-start gap-2 text-xs text-rose-700">
+                                        <Lucide.XCircle className="w-4 h-4 shrink-0 mt-0.5"/> Separate Fees (Ar/En)
+                                    </div>
+                                     <div className="flex items-start gap-2 text-xs text-rose-700">
+                                        <Lucide.XCircle className="w-4 h-4 shrink-0 mt-0.5"/> Manual Naming (Error Prone)
+                                    </div>
+                                    <div className="flex items-start gap-2 text-xs text-rose-700">
+                                        <Lucide.XCircle className="w-4 h-4 shrink-0 mt-0.5"/> Manual Attestation (MOFA)
+                                    </div>
+                                </div>
+                            </button>
 
-                        {VISIBLE_SPINE.map((s, i) => {
-                             const isActive = activeJourneyKey === s.id;
-                             const isPast = VISIBLE_SPINE.findIndex(x => x.id === activeJourneyKey) > i;
-                             const hasBranch = s.branches && s.branches.length > 0;
-                             
-                             return (
-                                <div key={s.id} className="flex flex-col items-center relative mx-0 group" style={{width: '140px'}}>
+                            {/* TO-BE BUTTON */}
+                            <button 
+                                onClick={() => onSelectMode('tobe')}
+                                className="group relative bg-gradient-to-br from-teal-600 to-teal-800 p-8 rounded-3xl shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-all text-left duration-300 h-full flex flex-col"
+                            >
+                                <div className="absolute top-6 right-6">
+                                    <span className="bg-white/20 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider border border-white/30 backdrop-blur-md">Future State</span>
+                                </div>
+                                <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm group-hover:bg-white/30 transition-colors">
+                                    <Lucide.Zap className="w-7 h-7 text-white"/>
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2">The "To-Be" Journey</h3>
+                                <p className="text-teal-100 text-sm mb-6 leading-relaxed">Seamless, proactive, and error-free. Powered by AI and full backend integration.</p>
+                                
+                                <div className="space-y-3 mt-auto">
+                                    <div className="flex items-start gap-2 text-xs text-white/90">
+                                        <Lucide.CheckCircle2 className="w-4 h-4 shrink-0 text-teal-300 mt-0.5"/> Auto-Notification (Zero Input)
+                                    </div>
+                                    <div className="flex items-start gap-2 text-xs text-white/90">
+                                        <Lucide.CheckCircle2 className="w-4 h-4 shrink-0 text-teal-300 mt-0.5"/> No Uploads (ICP Integration)
+                                    </div>
+                                    <div className="flex items-start gap-2 text-xs text-white/90">
+                                        <Lucide.CheckCircle2 className="w-4 h-4 shrink-0 text-teal-300 mt-0.5"/> Instant Bundle (Cert + ID + Passport)
+                                    </div>
+                                     <div className="flex items-start gap-2 text-xs text-white/90">
+                                        <Lucide.CheckCircle2 className="w-4 h-4 shrink-0 text-teal-300 mt-0.5"/> Smart Naming (ICP Verified)
+                                    </div>
+                                    <div className="flex items-start gap-2 text-xs text-white/90">
+                                        <Lucide.CheckCircle2 className="w-4 h-4 shrink-0 text-teal-300 mt-0.5"/> Auto MOFA Attestation
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- AS-IS JOURNEY (Simulating Friction) ---
+        const AsIsJourney = ({ onBack }) => {
+            const [step, setStep] = useState(1);
+            const [selectedNotif, setSelectedNotif] = useState("");
+            const [langSelection, setLangSelection] = useState({ ar: false, en: false });
+            const [rejectionVisible, setRejectionVisible] = useState(false);
+            // Manual Name Inputs
+            const [nameEn, setNameEn] = useState("");
+            const [nameAr, setNameAr] = useState("");
+
+            // 1. Confusing Dropdown
+            if (step === 1) {
+                return (
+                    <div className="max-w-md mx-auto mt-10 animate-fade-in px-4">
+                        <div className="mb-4">
+                            <button onClick={onBack} className="text-xs text-slate-500 hover:text-slate-900 flex items-center gap-1"><Lucide.ArrowLeft className="w-3 h-3"/> Back</button>
+                        </div>
+                        <Card className="p-6">
+                            <h2 className="text-lg font-bold mb-4">Step 1: Identification</h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Select Notification Number</label>
+                                    <select 
+                                        className="w-full border border-slate-300 rounded-lg p-2.5 text-sm text-slate-600 bg-slate-50"
+                                        value={selectedNotif}
+                                        onChange={(e) => setSelectedNotif(e.target.value)}
+                                    >
+                                        <option value="" disabled>-- Select --</option>
+                                        <option value="1293847192">1293847192</option>
+                                        <option value="1293847193">1293847193</option> 
+                                    </select>
+                                    <p className="text-xs text-rose-500 mt-2 bg-rose-50 p-2 rounded border border-rose-100 flex gap-2">
+                                        <Lucide.AlertCircle className="w-4 h-4 shrink-0"/> 
+                                        Complaint #241: "I have twins. Which number corresponds to which baby? The list is unclear."
+                                    </p>
+                                </div>
+                                <Button onClick={() => setStep(2)} disabled={!selectedNotif} className="w-full">Next</Button>
+                            </div>
+                        </Card>
+                    </div>
+                );
+            }
+
+            // 2. Document Uploads (Restored Friction)
+            if (step === 2) {
+                 return (
+                    <div className="max-w-md mx-auto mt-10 animate-fade-in px-4">
+                        <Card className="p-6">
+                            <h2 className="text-lg font-bold mb-4">Step 2: Upload Documents</h2>
+                            <div className="space-y-4">
+                                <p className="text-sm text-slate-600">Please upload valid copies of the following documents:</p>
+                                
+                                {['Father Passport', 'Mother Passport', 'Marriage Contract', 'Family Book', 'Father EID', 'Mother EID'].map(doc => (
+                                    <div key={doc} className="flex items-center justify-between p-3 border border-dashed border-slate-300 rounded-lg bg-slate-50">
+                                        <span className="text-xs font-medium text-slate-700">{doc}</span>
+                                        <button className="text-xs text-blue-600 font-bold hover:underline flex items-center gap-1"><Lucide.Upload className="w-3 h-3"/> Upload</button>
+                                    </div>
+                                ))}
+
+                                <div className="bg-amber-50 p-3 rounded border border-amber-100 text-xs text-amber-800 flex gap-2">
+                                    <Lucide.AlertTriangle className="w-4 h-4 shrink-0"/>
+                                    Complaint #412: "Why do I have to re-upload these? ICP already has my data!"
+                                </div>
+                                <Button onClick={() => setStep(3)} className="w-full">Next</Button>
+                            </div>
+                        </Card>
+                    </div>
+                );
+            }
+
+            // 3. Manual Naming (The Error Source)
+            if (step === 3) {
+                return (
+                    <div className="max-w-md mx-auto mt-10 animate-fade-in px-4">
+                        <Card className="p-6">
+                            <h2 className="text-lg font-bold mb-4">Step 3: Baby Details</h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Baby Name (English)</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Type Name..." 
+                                        value={nameEn} 
+                                        onChange={(e) => setNameEn(e.target.value)}
+                                        className="w-full border border-slate-300 rounded p-2 text-sm text-slate-900 focus:ring-2 focus:ring-teal-500 outline-none" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Baby Name (Arabic)</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="أدخل الاسم..." 
+                                        value={nameAr} 
+                                        onChange={(e) => setNameAr(e.target.value)}
+                                        className="w-full border border-slate-300 rounded p-2 text-sm text-slate-900 text-right focus:ring-2 focus:ring-teal-500 outline-none" 
+                                    />
+                                </div>
+                                
+                                {/* Added: Nationality Dropdown Error Simulation */}
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Nationality</label>
+                                    <select className="w-full border border-slate-300 rounded p-2 text-sm text-slate-900">
+                                        <option>United Arab Emirates</option>
+                                    </select>
+                                    <p className="text-[10px] text-rose-500 mt-1 hidden">Error: Input value doesn't match dropdown list.</p>
+                                </div>
+
+                                {/* Added: Religion Field */}
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Religion</label>
+                                    <select className="w-full border border-slate-300 rounded p-2 text-sm text-slate-900">
+                                        <option>Islam</option>
+                                    </select>
+                                </div>
+                                
+                                <div className="text-xs text-slate-400 italic">
+                                    * Please ensure Arabic and English names match phonetically.
+                                </div>
+                                
+                                <Button onClick={() => setStep(4)} disabled={!nameEn || !nameAr} className="w-full">Next</Button>
+                            </div>
+                        </Card>
+                    </div>
+                );
+            }
+
+            // 4. Language Selection (Extra Cost)
+            if (step === 4) {
+                 const cost = (langSelection.ar ? 50 : 0) + (langSelection.en ? 50 : 0);
+                 return (
+                    <div className="max-w-md mx-auto mt-10 animate-fade-in px-4">
+                        <Card className="p-6">
+                            <h2 className="text-lg font-bold mb-4">Step 4: Select Certificates</h2>
+                            <p className="text-sm text-slate-600 mb-4">Please select the copies you require:</p>
+                            
+                            <div className="space-y-3 mb-6">
+                                <label className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all ${langSelection.ar ? 'border-teal-500 bg-teal-50' : 'hover:bg-slate-50'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <input type="checkbox" checked={langSelection.ar} onChange={()=>setLangSelection({...langSelection, ar: !langSelection.ar})} className="w-4 h-4 text-teal-600" />
+                                        <span className="text-sm font-medium">Arabic Certificate</span>
+                                    </div>
+                                    <span className="text-sm font-bold">50 AED</span>
+                                </label>
+                                <label className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all ${langSelection.en ? 'border-teal-500 bg-teal-50' : 'hover:bg-slate-50'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <input type="checkbox" checked={langSelection.en} onChange={()=>setLangSelection({...langSelection, en: !langSelection.en})} className="w-4 h-4 text-teal-600" />
+                                        <span className="text-sm font-medium">English Certificate</span>
+                                    </div>
+                                    <span className="text-sm font-bold">50 AED</span>
+                                </label>
+                            </div>
+
+                             <div className="border-t border-slate-200 pt-4 mb-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="font-bold text-slate-900">Total</span>
+                                    <span className="text-xl font-bold text-teal-700">{cost}.00 AED</span>
+                                </div>
+                            </div>
+
+                            <Button onClick={() => setStep(5)} disabled={cost===0} className="w-full">Pay Now</Button>
+                        </Card>
+                    </div>
+                );
+            }
+
+            // 5. Processing -> Rejection
+            if (step === 5) {
+                return (
+                    <div className="max-w-md mx-auto mt-10 animate-fade-in px-4">
+                        <Card className="p-8 text-center">
+                            {!rejectionVisible ? (
+                                <div className="animate-fade-in">
+                                    <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                                        <Lucide.Clock className="w-8 h-8 text-amber-600"/>
+                                    </div>
+                                    <h2 className="text-xl font-bold text-slate-900 mb-2">Request Submitted</h2>
+                                    <p className="text-sm text-slate-500 mb-6">Your application is under review. Please wait 2-3 working days for approval.</p>
                                     
-                                    {/* Label Above */}
-                                    <div className="absolute -top-10 text-xs font-bold text-center w-full flex justify-center">
-                                        <span className={`whitespace-nowrap px-2 py-0.5 rounded-full ${isActive ? 'text-teal-900 bg-teal-50' : 'text-slate-500'}`}>{s.label}</span>
+                                    <Button onClick={() => setRejectionVisible(true)} variant="secondary" className="w-full border-dashed border-2">
+                                        <Lucide.FastForward className="w-4 h-4"/> Simulate: 2 Days Later
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="animate-fade-in">
+                                    <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Lucide.XCircle className="w-8 h-8 text-rose-600"/>
                                     </div>
-
-                                    {/* Main Node */}
-                                    <div className="relative z-10">
-                                        <button 
-                                            onClick={() => handleJourneyClick(s.id)}
-                                            className={`w-8 h-8 rounded-full flex items-center justify-center border-4 transition-all z-10 relative bg-white
-                                                ${isActive ? 'border-teal-600 ring-4 ring-teal-50 shadow-xl scale-125' : (isPast ? 'border-teal-600' : 'border-slate-300 hover:border-teal-400')}
-                                            `}
-                                        >
-                                            <div className={`w-2.5 h-2.5 rounded-full ${isActive || isPast ? 'bg-teal-600' : 'bg-slate-300'}`}></div>
-                                        </button>
+                                    <h2 className="text-xl font-bold text-slate-900 mb-2">Application Rejected</h2>
+                                    
+                                    <div className="bg-rose-50 p-4 rounded-xl border border-rose-200 text-left text-sm text-rose-800 mb-6">
+                                        <div className="flex items-start gap-2 mb-2">
+                                            <Lucide.AlertCircle className="w-4 h-4 shrink-0 mt-0.5"/>
+                                            <strong>Reason:</strong>
+                                        </div>
+                                        <p>Name Mismatch. The Arabic name does not match the English spelling as per ICP naming rules.</p>
                                     </div>
+                                    
+                                    <div className="text-xs text-slate-500 mb-6">
+                                        Please submit a new application with corrected names. Fees are non-refundable.
+                                    </div>
+                                    <Button onClick={onBack} variant="outline" className="w-full">Back to Home</Button>
+                                </div>
+                            )}
+                        </Card>
+                    </div>
+                );
+            }
+        };
 
-                                    {/* BRANCHES (Below) */}
-                                    {hasBranch && (
-                                        <div className="absolute top-8 flex flex-col items-center w-full">
-                                            {/* Main Vertical Stem */}
-                                            <div className="h-6 w-0.5 bg-slate-300"></div>
+        // --- TO-BE JOURNEY (The Solution with Life Hub Features) ---
+        const ToBeJourney = ({ onBack }) => {
+            const [step, setStep] = useState(0); 
+            const [nameEn, setNameEn] = useState("");
+            const [nameAr, setNameAr] = useState("");
+            const [aiSuggestions, setAiSuggestions] = useState([]);
+            const [addMofa, setAddMofa] = useState(false);
+            const [isProcessing, setIsProcessing] = useState(false);
+            const [showPaymentRecovery, setShowPaymentRecovery] = useState(false);
+            const [isRecovering, setIsRecovering] = useState(false);
+            
+            // Check if both fields have values for validation
+            const isNameConfirmed = nameEn.length > 0 && nameAr.length > 0;
 
-                                            {/* Horizontal Bar for Multiple Branches */}
-                                            {s.branches.length > 1 && (
-                                                <div className="w-[100px] h-0.5 bg-slate-300 relative">
-                                                     {/* Vertical Connectors from Bar to Nodes */}
-                                                     <div className="absolute left-0 h-3 w-0.5 bg-slate-300 top-0"></div>
-                                                     <div className="absolute right-0 h-3 w-0.5 bg-slate-300 top-0"></div>
-                                                </div>
-                                            )}
+            // Metro Map Steps
+            const steps = [
+                { id: 1, label: "Notification" },
+                { id: 2, label: "Naming" },
+                { id: 3, label: "Docs" },
+                { id: 4, label: "Bundle" },
+                { id: 5, label: "Success" }
+            ];
 
-                                            <div className={`flex justify-center ${s.branches.length > 1 ? 'gap-12 pt-3' : 'pt-0'}`}>
-                                                {s.branches.map((branch) => {
-                                                    const isBranchActive = activeJourneyKey === branch.id;
-                                                    return (
-                                                        <button 
-                                                            key={branch.id}
-                                                            onClick={() => handleJourneyClick(branch.id)}
-                                                            className={`px-3 py-1 rounded-full text-[10px] font-bold shadow-sm border transition-all whitespace-nowrap bg-white
-                                                                ${isBranchActive ? 'border-amber-500 text-amber-700 bg-amber-50 ring-2 ring-amber-100' : 'border-slate-200 text-slate-500 hover:border-amber-300 hover:text-amber-600'}
-                                                            `}
-                                                        >
-                                                            {branch.label}
-                                                        </button>
-                                                    )
-                                                })}
-                                            </div>
+            // 0. Notification
+            if (step === 0) {
+                return (
+                    <div className="h-screen flex flex-col items-center justify-center p-6 animate-fade-in relative bg-slate-100">
+                        <div className="absolute top-10 left-0 w-full px-4">
+                            <div 
+                                onClick={() => setStep(1)}
+                                className="bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/50 cursor-pointer hover:scale-105 transition-transform animate-slide-up flex gap-4 items-start"
+                            >
+                                <div className="bg-teal-100 p-2 rounded-xl text-teal-700">
+                                    <Lucide.Baby className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-sm text-slate-900">Mabrouk Ma Yak!</h4>
+                                    <p className="text-xs text-slate-500 mt-1">Birth notification received for <strong>Baby Boy</strong>. Tap to name him & get documents.</p>
+                                    <span className="text-[10px] text-slate-400 mt-2 block">Just now</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p className="text-slate-400 text-sm mt-32">Simulating Phone Home Screen...</p>
+                        <Button onClick={onBack} variant="ghost" className="absolute bottom-10">Exit Demo</Button>
+                    </div>
+                );
+            }
+
+            // Header for Steps
+            const Header = () => (
+                <div className="flex justify-between items-center mb-6 px-4">
+                    {steps.map((s, i) => (
+                        <div key={s.id} className="flex flex-col items-center gap-1 relative z-10">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= s.id ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                                {step > s.id ? <Lucide.Check className="w-4 h-4"/> : s.id}
+                            </div>
+                            <span className="text-[10px] text-slate-500 font-medium">{s.label}</span>
+                        </div>
+                    ))}
+                    <div className="absolute h-0.5 bg-slate-200 left-8 right-8 top-10 -z-0">
+                        <div className="h-full bg-teal-600 transition-all duration-500" style={{width: `${((step-1)/(steps.length-1))*100}%`}}></div>
+                    </div>
+                </div>
+            );
+
+            // 1. Naming (Hybrid: Manual + AI + Validation)
+            if (step === 1) {
+                return (
+                    <div className="max-w-md mx-auto mt-6 px-4 animate-fade-in pb-20">
+                        <Header />
+                        <Card className="p-6 mb-4">
+                            <h2 className="text-xl font-bold mb-6">Name Your Baby</h2>
+                            
+                            <div className="space-y-6">
+                                {/* Option A: Manual */}
+                                <div className="space-y-3">
+                                    <label className="block text-sm font-bold text-slate-700">Manual Entry</label>
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-500 mb-1">English Name</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="e.g. Zayed" 
+                                            className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 outline-none"
+                                            value={nameEn}
+                                            onChange={(e) => setNameEn(e.target.value)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-500 mb-1">Arabic Name</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="e.g. زايد" 
+                                            className="w-full p-2 border border-slate-300 rounded-lg text-sm text-right focus:ring-2 focus:ring-teal-500 outline-none"
+                                            value={nameAr}
+                                            onChange={(e) => setNameAr(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="relative flex py-2 items-center">
+                                    <div className="flex-grow border-t border-slate-200"></div>
+                                    <span className="flex-shrink-0 mx-4 text-xs text-slate-400">OR USE AI</span>
+                                    <div className="flex-grow border-t border-slate-200"></div>
+                                </div>
+
+                                {/* Option B: AI */}
+                                <div className="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Lucide.Sparkles className="w-4 h-4 text-purple-600"/>
+                                        <span className="text-xs font-bold text-purple-700">AI Suggestion</span>
+                                    </div>
+                                    <button 
+                                        onClick={() => setAiSuggestions([
+                                            {en: "Zayed", ar: "زايد"}, 
+                                            {en: "Khalifa", ar: "خليفة"}, 
+                                            {en: "Hamdan", ar: "حمدان"}
+                                        ])}
+                                        className="bg-white text-purple-700 border border-purple-200 px-3 py-2 rounded-lg text-xs font-bold hover:bg-purple-50 w-full"
+                                    >
+                                        Suggest Names
+                                    </button>
+                                    {aiSuggestions.length > 0 && (
+                                        <div className="flex gap-2 mt-3 animate-fade-in flex-wrap">
+                                            {aiSuggestions.map((suggestion, idx) => (
+                                                <button 
+                                                    key={idx}
+                                                    onClick={() => { setNameEn(suggestion.en); setNameAr(suggestion.ar); }}
+                                                    className="px-3 py-1 rounded-full text-xs font-medium border bg-white text-purple-700 border-purple-200 hover:bg-purple-50"
+                                                >
+                                                    {suggestion.en} / {suggestion.ar}
+                                                </button>
+                                            ))}
                                         </div>
                                     )}
                                 </div>
-                             )
-                        })}
-                    </div>
-                  </div>
-              </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                <div className="lg:col-span-2 space-y-8">
-                  {activeProfile === 'father' && <FathersHealthCard />}
-                  {JOURNEY_DATA[activeJourneyKey] ? (
-                      <>
-                        <JourneyProgressCard journeyKey={activeJourneyKey} data={JOURNEY_DATA[activeJourneyKey]} onAction={(action) => { if(action === 'restart_marriage') handleRestartMarriage(); }} />
-                        <Card className="bg-white overflow-hidden min-h-[300px]">
-                            <div className="p-6">
-                                <div className="flex items-center gap-2 mb-6"><Icons.ListTodo className="h-5 w-5 text-teal-600" /><h3 className="font-bold text-lg text-slate-900">Your Action Plan</h3></div>
-                                <JourneyTimeline data={JOURNEY_DATA[activeJourneyKey]} onAction={handleTimelineAction} />
+                                {/* Validation Success Badge */}
+                                {isNameConfirmed && (
+                                    <div className="animate-slide-up">
+                                        <div className="flex items-center gap-2 bg-green-50 text-green-800 p-3 rounded-xl border border-green-200 text-xs font-bold mb-4">
+                                            <Lucide.ShieldCheck className="w-5 h-5 text-green-600"/>
+                                            <div>
+                                                <div className="text-sm">Verified Match</div>
+                                                <div className="font-normal opacity-80">Arabic & English names match ICP rules.</div>
+                                            </div>
+                                        </div>
+                                        <Button onClick={() => setStep(2)} className="w-full">Confirm Name: {nameEn}</Button>
+                                    </div>
+                                )}
                             </div>
                         </Card>
-                      </>
-                  ) : (
-                      <div className="p-8 text-center text-slate-400 bg-slate-100 rounded-2xl border border-dashed border-slate-300">Select a journey from the map above to view details.</div>
-                  )}
-                </div>
+                    </div>
+                );
+            }
 
-                <div className="space-y-6">
-                  <InteractiveAIAssistant persona={personaKey} activeStage={activeJourneyKey} activeProfile={activeProfile} />
-                  <Card>
-                    <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50"><div className="flex items-center justify-between"><CardTitle className="text-base flex items-center gap-2"><Icons.FileText className="h-4 w-4" /> Documents</CardTitle><Badge variant="outline" className="bg-white">Digital Locker</Badge></div></CardHeader>
-                    <CardContent className="pt-0">
-                        <div className="py-3">
-                            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">Ready</div>
-                            <div className="space-y-2">
-                                <div onClick={() => setActiveDocument('Family Book')} className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 cursor-pointer"><div className="flex items-center gap-3"><div className="p-2 bg-teal-50 rounded text-teal-600"><Icons.CheckCircle2 className="h-4 w-4" /></div><div><div className="text-sm font-medium text-slate-900">Family Book</div><div className="text-[10px] text-slate-500">Updated: Today</div></div></div><Badge variant="outline" className="text-[10px] bg-white">Active</Badge></div>
+            // 2. Documents (Auto-Fetch)
+            if (step === 2) {
+                return (
+                    <div className="max-w-md mx-auto mt-6 px-4 animate-fade-in pb-20">
+                        <Header />
+                        <Card className="p-6">
+                            <h2 className="text-xl font-bold mb-6">Documents</h2>
+                            <p className="text-sm text-slate-500 mb-4">We retrieved your official documents from ICP.</p>
+
+                            <div className="space-y-3 mb-6">
+                                <div className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-green-100 p-2 rounded-lg text-green-700"><Lucide.UserCheck className="w-5 h-5"/></div>
+                                        <div>
+                                            <div className="text-sm font-bold text-slate-900">Father's ID & Passport</div>
+                                            <div className="text-[10px] text-slate-500">Fetched from ICP</div>
+                                        </div>
+                                    </div>
+                                    <Lucide.Check className="w-5 h-5 text-green-600"/>
+                                </div>
+                                <div className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-green-100 p-2 rounded-lg text-green-700"><Lucide.UserCheck className="w-5 h-5"/></div>
+                                        <div>
+                                            <div className="text-sm font-bold text-slate-900">Mother's ID & Passport</div>
+                                            <div className="text-[10px] text-slate-500">Fetched from ICP</div>
+                                        </div>
+                                    </div>
+                                    <Lucide.Check className="w-5 h-5 text-green-600"/>
+                                </div>
+                                <div className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-green-100 p-2 rounded-lg text-green-700"><Lucide.FileCheck className="w-5 h-5"/></div>
+                                        <div>
+                                            <div className="text-sm font-bold text-slate-900">Marriage Contract</div>
+                                            <div className="text-[10px] text-slate-500">Verified (Ministry of Justice)</div>
+                                        </div>
+                                    </div>
+                                    <Lucide.Check className="w-5 h-5 text-green-600"/>
+                                </div>
                             </div>
-                        </div>
-                        <Separator />
-                        <div className="py-3">
-                            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">Pending</div>
-                            <div className="space-y-2">
-                                <div onClick={() => setActiveDocument('Birth Certificate')} className="flex items-center justify-between p-2 rounded-lg bg-amber-50/50 border border-amber-100 cursor-pointer"><div className="flex items-center gap-3"><div className="p-2 bg-amber-100 rounded text-amber-600"><Icons.Clock className="h-4 w-4" /></div><div><div className="text-sm font-medium text-slate-900">Birth Certificate</div><div className="text-[10px] text-slate-500">Draft - Awaiting Name</div></div></div><div className="text-amber-600"><Icons.ArrowRight className="h-4 w-4" /></div></div>
+                            <Button onClick={() => setStep(3)} className="w-full">Proceed to Bundle</Button>
+                        </Card>
+                    </div>
+                );
+            }
+
+            // 3. Bundle & Fees
+            if (step === 3) {
+                return (
+                    <div className="max-w-md mx-auto mt-6 px-4 animate-fade-in pb-20">
+                        <Header />
+                        <Card className="p-6">
+                            <h2 className="text-xl font-bold mb-2">Mabrouk Ma Yak</h2>
+                            <p className="text-sm text-slate-500 mb-6">One bundle. All documents.</p>
+
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Fee Breakdown</h4>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-700">Birth Certificate</span>
+                                        <span className="font-bold">50.00 AED</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-700">Emirates ID (Newborn)</span>
+                                        <span className="font-bold">170.00 AED</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-700">Passport Issuance</span>
+                                        <span className="font-bold">55.00 AED</span>
+                                    </div>
+                                </div>
+                                <div className="border-t border-slate-200 my-3"></div>
+                                <div className="flex justify-between items-center text-sm font-bold text-teal-800">
+                                    <span>Bundle Total</span>
+                                    <span>275.00 AED</span>
+                                </div>
                             </div>
-                        </div>
-                    </CardContent>
-                  </Card>
+
+                            {/* Optional MOFA Add-on */}
+                            <div 
+                                onClick={() => setAddMofa(!addMofa)}
+                                className={`p-4 rounded-xl border-2 cursor-pointer transition-all mb-6 flex items-start gap-3 ${addMofa ? 'border-teal-600 bg-teal-50' : 'border-slate-200 hover:border-teal-300'}`}
+                            >
+                                <div className={`w-5 h-5 rounded border flex items-center justify-center mt-0.5 ${addMofa ? 'bg-teal-600 border-teal-600' : 'border-slate-300 bg-white'}`}>
+                                    {addMofa && <Lucide.Check className="w-3 h-3 text-white"/>}
+                                </div>
+                                <div>
+                                    <div className="font-bold text-sm text-slate-900">Auto-Attest with MOFA</div>
+                                    <p className="text-xs text-slate-500 mt-1">Digital attestation stamp from Ministry of Foreign Affairs.</p>
+                                    <div className="text-xs font-bold text-teal-700 mt-1">+150.00 AED</div>
+                                </div>
+                            </div>
+
+                            <Button onClick={() => setStep(4)} className="w-full">Continue to Payment</Button>
+                        </Card>
+                    </div>
+                );
+            }
+
+            // 4. Payment
+            if (step === 4) {
+                const total = 275 + (addMofa ? 150 : 0);
+                return (
+                    <div className="max-w-md mx-auto mt-6 px-4 animate-fade-in pb-20">
+                        <Header />
+                        <Card className="p-6">
+                            <h2 className="text-xl font-bold mb-6">Checkout</h2>
+                            
+                            <div className="flex justify-between items-center mb-6 p-4 bg-slate-900 text-white rounded-xl shadow-lg">
+                                <span className="font-medium">Total Amount</span>
+                                <span className="text-2xl font-bold">{total}.00 AED</span>
+                            </div>
+
+                            <div className="space-y-3 mb-6">
+                                <div className="text-xs text-slate-500 uppercase tracking-wider font-bold">Summary</div>
+                                <div className="flex justify-between text-xs text-slate-600">
+                                    <span>Mabrouk Ma Yak Bundle</span>
+                                    <span>275.00 AED</span>
+                                </div>
+                                {addMofa && (
+                                    <div className="flex justify-between text-xs text-slate-600">
+                                        <span>MOFA Attestation</span>
+                                        <span>150.00 AED</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <Button onClick={() => setShowPaymentRecovery(true)} className="w-full mb-3" variant="black" icon={Lucide.Apple}>Pay with Apple Pay</Button>
+                            
+                            {/* Payment Recovery Logic */}
+                            {showPaymentRecovery && (
+                                <div className="animate-fade-in">
+                                    {isRecovering ? (
+                                        <div className="flex items-center justify-center gap-2 text-sm text-teal-600 font-medium py-2">
+                                            <Lucide.Loader2 className="w-4 h-4 animate-spin"/> Verifying transaction...
+                                        </div>
+                                    ) : (
+                                        <button 
+                                            onClick={() => { setIsRecovering(true); setTimeout(() => setStep(5), 2000); }}
+                                            className="w-full text-center text-xs text-blue-600 hover:text-blue-800 underline py-2"
+                                        >
+                                            I already paid, but status didn't update?
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </Card>
+                    </div>
+                );
+            }
+
+            // 5. Success
+            if (step === 5) {
+                return (
+                    <div className="max-w-md mx-auto mt-6 px-4 animate-fade-in pb-20 text-center">
+                        <Header />
+                        <Card className="p-8 relative overflow-hidden">
+                            {/* Confetti */}
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-400 to-blue-500"></div>
+                            
+                            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                                <Lucide.Check className="w-10 h-10 text-green-600"/>
+                            </div>
+                            <h2 className="text-2xl font-bold text-slate-900 mb-2">Mabrouk!</h2>
+                            <p className="text-slate-500 text-sm mb-6">Zayed's documents are issued.</p>
+
+                            {/* Health Score Boost */}
+                            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 mb-6 flex items-center justify-center gap-2">
+                                <Lucide.TrendingUp className="w-5 h-5 text-emerald-600"/>
+                                <span className="text-sm font-bold text-emerald-800">Family Health Score: +15 Points!</span>
+                            </div>
+
+                            {/* Smart Wallet */}
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 text-left">
+                                <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Digital Locker</h4>
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200 shadow-sm cursor-pointer hover:border-teal-500 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <Lucide.FileCheck className="w-5 h-5 text-teal-600"/>
+                                            <span className="text-sm font-medium">Birth Certificate</span>
+                                        </div>
+                                        <Lucide.Download className="w-4 h-4 text-slate-400"/>
+                                    </div>
+                                    <div className="flex items-center justify-between bg-black text-white p-2 rounded-lg shadow-sm cursor-pointer hover:bg-gray-800 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <Lucide.Wallet className="w-5 h-5"/>
+                                            <span className="text-sm font-medium">Add to Apple Wallet</span>
+                                        </div>
+                                        <Lucide.Plus className="w-4 h-4"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Kiosk */}
+                            <div className="bg-slate-900 text-white p-5 rounded-2xl text-left relative overflow-hidden group cursor-pointer shadow-xl transform transition-all hover:scale-105">
+                                <div className="relative z-10">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Lucide.Printer className="w-5 h-5 text-teal-400"/>
+                                        <span className="font-bold text-lg">Hospital Kiosk Pickup</span>
+                                    </div>
+                                    <p className="text-xs text-slate-300 pr-8 leading-relaxed">
+                                        Scan this code at the ICP Kiosk in the lobby to print the physical Passport & ID right now.
+                                    </p>
+                                </div>
+                                <div className="mt-4 bg-white p-2 rounded-lg w-fit">
+                                    <Lucide.QrCode className="w-16 h-16 text-slate-900"/>
+                                </div>
+                            </div>
+
+                            <Button onClick={onBack} variant="secondary" className="w-full mt-6">Back to Home</Button>
+                        </Card>
+                    </div>
+                );
+            }
+        };
+
+        // --- MAIN APP COMPONENT ---
+        const App = () => {
+            const [view, setView] = useState('splash'); // splash -> login -> landing -> (asis/tobe)
+
+            return (
+                <div className="font-sans antialiased text-slate-900 bg-slate-50 min-h-screen">
+                    {view === 'splash' && <TammSplash onNext={() => setView('login')} />}
+                    {view === 'login' && <UAEPassLogin onLogin={() => setView('landing')} />}
+                    {view === 'landing' && <LandingPage onSelectMode={(mode) => setView(mode)} />}
+                    {view === 'asis' && <AsIsJourney onBack={() => setView('landing')} />}
+                    {view === 'tobe' && <ToBeJourney onBack={() => setView('landing')} />}
                 </div>
-              </div>
+            );
+        };
 
-              {/* MODALS */}
-              <BabyNamingModal isOpen={isNamingModalOpen} onClose={() => setIsNamingModalOpen(false)} onNameSubmit={handleNameSubmit} persona={personaKey} />
-              <GenderRevealModal isOpen={isRevealModalOpen} onClose={() => setIsRevealModalOpen(false)} onReveal={handleGenderReveal} />
-              <BookingModal isOpen={isBookingModalOpen} onClose={() => setIsBookingModalOpen(false)} onConfirm={handleBookingConfirm} serviceName="Premarital Screening" />
-              <DocumentPreviewModal isOpen={!!activeDocument} onClose={() => setActiveDocument(null)} docType={activeDocument} persona={personaKey} babyName={babyName} />
-
-            </div>
-          </div>
-        );
-      }
-
-      const root = ReactDOM.createRoot(document.getElementById("root"));
-      root.render(<LifeEventsMedicalHubDashboard />);
+        const root = ReactDOM.createRoot(document.getElementById("root"));
+        root.render(<App />);
     </script>
-  </body>
+</body>
 </html>
